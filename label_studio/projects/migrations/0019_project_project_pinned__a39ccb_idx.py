@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('projects', '0018_alter_project_control_weights'),
+        ('projects', '0019_labelstreamhistory'),
     ]
 
     operations = [
