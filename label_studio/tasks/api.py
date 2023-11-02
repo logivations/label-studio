@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import logging
+import datetime
 
 from django.db import transaction
 from django.db.models import Q
@@ -294,6 +295,24 @@ class AnnotationAPI(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         return super(AnnotationAPI, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kargs):
+        """
+        A function that parses and stores annotations in the database using transaction.atomic
+        """
+        request_data = request.data
+        annotations_array = request_data.get("result", [])
+        tasks_array = request_data.get("task", [])
+        tasks = Task.objects.select_related('project').in_bulk(tasks_array)
+        with transaction.atomic():
+            for annotation, task_id in zip(annotations_array, tasks_array):
+                 Annotation.objects.create(
+                    result=annotation,
+                    task=tasks.get(task_id),
+                    project=tasks.get(task_id).project,
+                    completed_by=tasks.get(task_id).project.created_by,
+                 )
+        return Response(data={'success': 'Annotations created successfully.'}, status=status.HTTP_201_CREATED)
 
     @api_webhook(WebhookAction.ANNOTATION_UPDATED)
     @swagger_auto_schema(auto_schema=None)
