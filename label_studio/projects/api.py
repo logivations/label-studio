@@ -496,6 +496,41 @@ class ProjectTaskListAPI(GetParentObjectMixin, generics.ListCreateAPIView,
         return instance
 
 
+class ProjectTaggedTaskListAPI(GetParentObjectMixin, generics.ListCreateAPIView,
+                         generics.DestroyAPIView):
+
+    queryset = Task.objects.all()
+    parent_queryset = Project.objects.all()
+    permission_required = ViewClassPermission(
+        GET=all_permissions.tasks_view,
+        POST=all_permissions.tasks_change,
+        DELETE=all_permissions.tasks_delete,
+    )
+    serializer_class = TaskSerializer
+
+    def filter_queryset(self, meta):
+        """
+        A method that filters tasks by tags
+        """
+        # ordering is deprecated here
+        project = generics.get_object_or_404(Project.objects.for_user(self.request.user), pk=self.kwargs['pk'])
+        tasks = Task.objects.filter(project=project).order_by('-updated_at')
+        task_ids = []
+        for task in tasks:
+            if task.meta.get('tags'):
+                if all(key in task.meta['tags'] and task.meta['tags'][key] == value for key, value in meta['tags'].items()):
+                    task_ids.append(task.id)
+        filtered_tasks = Task.objects.filter(id__in=task_ids)
+        return filtered_tasks
+
+    def post(self, *args, **kwargs):
+        """
+        A method that accepts requests for /tagged-task for filtering
+        """
+        querryset = self.filter_queryset(self.request.data)
+        serializer = TaskSimpleSerializer(querryset, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 class TemplateListAPI(generics.ListAPIView):
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     permission_required = all_permissions.projects_view
