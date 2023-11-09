@@ -13,9 +13,7 @@ class LocalFilesImportStorageSerializer(ImportStorageSerializer):
     class Meta:
         model = LocalFilesImportStorage
         fields = '__all__'
-        extra_kwargs = {
-            'meta': {'required': False},
-        }
+
     def validate(self, data):
         # Validate local file path
         data = super(LocalFilesImportStorageSerializer, self).validate(data)

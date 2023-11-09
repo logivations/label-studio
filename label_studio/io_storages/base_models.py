@@ -96,8 +96,10 @@ class StorageInfo(models.Model):
         self.status = self.Status.QUEUED
 
         # reset and init meta
-        self.meta['attempts'] = self.meta.get('attempts', 0) + 1
-        self.meta['time_queued'] = str(timezone.now())
+        self.meta = {
+            'attempts': self.meta.get('attempts', 0) + 1,
+            'time_queued': str(timezone.now())
+        }
 
         self.save(update_fields=['last_sync_job', 'last_sync', 'last_sync_count', 'status', 'meta'])
 
@@ -335,7 +337,7 @@ class ImportStorage(Storage):
                 data=data, project=project, overlap=maximum_annotations,
                 is_labeled=len(annotations) >= maximum_annotations, total_predictions=len(predictions),
                 total_annotations=len(annotations) - cancelled_annotations,
-                cancelled_annotations=cancelled_annotations, inner_id=max_inner_id, meta=storage.meta["tags"]
+                cancelled_annotations=cancelled_annotations, inner_id=max_inner_id
             )
 
             link_class.create(task, key, storage)

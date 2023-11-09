@@ -102,14 +102,7 @@ class ImportStorageSyncAPI(generics.GenericAPIView):
         return ImportStorageClass.objects.all()
 
     def post(self, request, *args, **kwargs):
-        """
-        A method that accepts requests for create tasks
-        """
         storage = self.get_object()
-        if 'meta' in request.data and isinstance(request.data["meta"], dict):
-            storage.meta['tags'] = request.data["meta"]
-        else:
-            storage.meta['tags'] = None
         # check connectivity & access, raise an exception if not satisfied
         storage.validate_connection()
         storage.sync()
