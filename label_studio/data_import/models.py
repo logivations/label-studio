@@ -1,20 +1,18 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
-import logging
 import os
 import uuid
-from collections import Counter
-
+import logging
 import pandas as pd
-
+from collections import Counter
 try:
     import ujson as json
-except:  # noqa: E722
+except:
     import json
 
+from django.db import models
 from core.feature_flags import flag_set
 from django.conf import settings
-from django.db import models
 from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -59,7 +57,7 @@ class FileUpload(models.Model):
         file_format = None
         try:
             file_format = os.path.splitext(filepath)[-1]
-        except:  # noqa: E722
+        except:
             pass
         finally:
             logger.debug('Get file format ' + str(file_format))
@@ -145,8 +143,7 @@ class FileUpload(models.Model):
             elif not self.project.one_object_in_label_config:
                 raise ValidationError(
                     'Your label config has more than one data key and direct file upload supports only '
-                    'one data key. To import data with multiple data keys, use a JSON or CSV file.'
-                )
+                    'one data key. To import data with multiple data keys, use a JSON or CSV file.')
 
             # file as a single asset
             elif file_format in ('.html', '.htm', '.xml'):
@@ -159,9 +156,7 @@ class FileUpload(models.Model):
         return tasks
 
     @classmethod
-    def load_tasks_from_uploaded_files(
-        cls, project, file_upload_ids=None, formats=None, files_as_tasks_list=True, trim_size=None
-    ):
+    def load_tasks_from_uploaded_files(cls, project, file_upload_ids=None, formats=None, files_as_tasks_list=True, trim_size=None):
         tasks = []
         fileformats = []
         common_data_fields = set()
@@ -207,19 +202,14 @@ def _old_vs_new_data_keys_inconsistency_message(new_data_keys, old_data_keys, cu
     if new_data_keys_list == old_data_keys_list:
         return ''
     elif new_data_keys_list == settings.DATA_UNDEFINED_NAME:
-        return (
-            common_prefix + 'uploading a single file {0} '
-            'clashes with data key(s) found from other files:\n"{1}"'.format(current_file, old_data_keys_list)
-        )
+        return common_prefix + "uploading a single file {0} " \
+                               "clashes with data key(s) found from other files:\n\"{1}\"".format(
+                                current_file, old_data_keys_list)
     elif old_data_keys_list == settings.DATA_UNDEFINED_NAME:
-        return (
-            common_prefix + 'uploading tabular data from {0} with data key(s) {1}, '
-            'clashes with other raw binary files (images, audios, etc.)'.format(current_file, new_data_keys_list)
-        )
+        return common_prefix + "uploading tabular data from {0} with data key(s) {1}, " \
+                               "clashes with other raw binary files (images, audios, etc.)".format(
+                                current_file, new_data_keys_list)
     else:
-        return (
-            common_prefix + 'uploading tabular data from "{0}" with data key(s) "{1}", '
-            'clashes with data key(s) found from other files:\n"{2}"'.format(
-                current_file, new_data_keys_list, old_data_keys_list
-            )
-        )
+        return common_prefix + "uploading tabular data from \"{0}\" with data key(s) \"{1}\", " \
+                               "clashes with data key(s) found from other files:\n\"{2}\"".format(
+                                current_file, new_data_keys_list, old_data_keys_list)

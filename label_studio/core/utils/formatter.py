@@ -1,5 +1,4 @@
 from pythonjsonlogger import jsonlogger
-
 from label_studio.core.current_request import get_current_request
 
 

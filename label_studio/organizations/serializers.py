@@ -1,18 +1,19 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
-from collections import OrderedDict
-
 import ujson as json
-from drf_dynamic_fields import DynamicFieldsMixin
-from organizations.models import Organization, OrganizationMember
+
 from rest_framework import serializers
+from drf_dynamic_fields import DynamicFieldsMixin
+
+from organizations.models import Organization, OrganizationMember
 from users.serializers import UserSerializer
+from collections import OrderedDict
 
 
 class OrganizationIdSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['id', 'title', 'contact_info']
+        fields = ['id', 'title']
 
 
 class OrganizationSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
@@ -43,10 +44,11 @@ class UserSerializerWithProjects(UserSerializer):
             return None
 
         current_user = self.context['request'].user
-        projects = user.annotations.filter(project__organization=current_user.active_organization).values(
-            'project__id', 'project__title'
-        )
-        contributed_to = [(json.dumps({'id': p['project__id'], 'title': p['project__title']}), 0) for p in projects]
+        projects = user.annotations\
+            .filter(project__organization=current_user.active_organization)\
+            .values('project__id', 'project__title')
+        contributed_to = [(json.dumps({'id': p['project__id'], 'title': p['project__title']}), 0)
+                          for p in projects]
         contributed_to = OrderedDict(contributed_to)  # remove duplicates without ordering losing
         return [json.loads(key) for key in contributed_to]
 
@@ -56,7 +58,6 @@ class UserSerializerWithProjects(UserSerializer):
 
 class OrganizationMemberUserSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
     """Adds all user properties"""
-
     user = UserSerializerWithProjects()
 
     class Meta:

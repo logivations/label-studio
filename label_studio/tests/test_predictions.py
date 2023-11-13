@@ -1,20 +1,19 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
-import json
-
 import pytest
 import requests_mock
-from core.redis import redis_healthcheck
-from ml.models import MLBackend
-from projects.models import Project
-from tasks.models import Annotation, AnnotationDraft, Prediction, Task
-from users.models import User
+import json
 
+from projects.models import Project
+from ml.models import MLBackend
+from tasks.models import Task, Prediction, Annotation, AnnotationDraft
+from users.models import User
 from .utils import make_project
+from core.redis import redis_healthcheck
 
 _project_for_text_choices_onto_A_B_classes = dict(
     title='Test',
-    label_config="""
+    label_config='''
         <View>
           <Text name="meta_info" value="$meta_info"></Text>
           <Text name="text" value="$text"></Text>
@@ -22,7 +21,7 @@ _project_for_text_choices_onto_A_B_classes = dict(
             <Choice value="class_A"></Choice>
             <Choice value="class_B"></Choice>
           </Choices>
-        </View>""",
+        </View>''',
 )
 
 _2_tasks_with_textA_and_textB = [
@@ -205,14 +204,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345_old',
-                label_config="""
+                label_config='''
                 <View>
                   <Text name="txt" value="$text"></Text>
                   <Choices name="cls" toName="txt" choice="single">
                     <Choice value="class_A"></Choice>
                     <Choice value="class_B"></Choice>
                   </Choices>
-                </View>""",
+                </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -251,14 +250,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345_old',
-                label_config="""
+                label_config='''
         <View>
           <Text name="txt" value="$text"></Text>
           <Choices name="cls" toName="txt" choice="single">
             <Choice value="class_A"></Choice>
             <Choice value="class_B"></Choice>
           </Choices>
-        </View>""",
+        </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -297,14 +296,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345',
-                label_config="""
+                label_config='''
         <View>
           <Text name="txt" value="$text"></Text>
           <Choices name="cls" toName="txt" choice="single">
             <Choice value="class_A"></Choice>
             <Choice value="class_B"></Choice>
           </Choices>
-        </View>""",
+        </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -343,14 +342,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345_old',
-                label_config="""
+                label_config='''
 <View>
   <Text name="txt" value="$text"></Text>
   <Choices name="cls" toName="txt" choice="single">
     <Choice value="class_A"></Choice>
     <Choice value="class_B"></Choice>
   </Choices>
-</View>""",
+</View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -389,14 +388,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345',
-                label_config="""
+                label_config='''
 <View>
   <Text name="txt" value="$text"></Text>
   <Choices name="cls" toName="txt" choice="single">
     <Choice value="class_A"></Choice>
     <Choice value="class_B"></Choice>
   </Choices>
-</View>""",
+</View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -420,14 +419,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345',
-                label_config="""
+                label_config='''
                 <View>
                 <Text name="txt" value="$text"></Text>
                 <Choices name="cls" toName="txt" choice="single">
                 <Choice value="class_A"></Choice>
                 <Choice value="class_B"></Choice>
                 </Choices>
-                </View>""",
+                </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -460,14 +459,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345',
-                label_config="""
+                label_config='''
         <View>
         <Text name="txt" value="$text"></Text>
         <Choices name="cls" toName="txt" choice="single">
         <Choice value="class_A"></Choice>
         <Choice value="class_B"></Choice>
         </Choices>
-        </View>""",
+        </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -508,14 +507,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345',
-                label_config="""
+                label_config='''
         <View>
         <Text name="txt" value="$text"></Text>
         <Choices name="cls" toName="txt" choice="single">
         <Choice value="class_A"></Choice>
         <Choice value="class_B"></Choice>
         </Choices>
-        </View>""",
+        </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -548,14 +547,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345_old',
-                label_config="""
+                label_config='''
     <View>
     <Text name="txt" value="$text"></Text>
     <Choices name="cls" toName="txt" choice="single">
     <Choice value="class_A"></Choice>
     <Choice value="class_B"></Choice>
     </Choices>
-    </View>""",
+    </View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -588,14 +587,14 @@ def test_predictions(
             dict(
                 title='Test',
                 model_version='12345_old',
-                label_config="""
+                label_config='''
 <View>
 <Text name="txt" value="$text"></Text>
 <Choices name="cls" toName="txt" choice="single">
 <Choice value="class_A"></Choice>
 <Choice value="class_B"></Choice>
 </Choices>
-</View>""",
+</View>''',
             ),
             # setup API returns this model version
             '12345',
@@ -654,13 +653,13 @@ def test_predictions_with_partially_predicted_tasks(
         if annotation is not None:
             Annotation.objects.create(task=task_obj, **annotation)
         if prediction is not None:
-            Prediction.objects.create(task=task_obj, project=task_obj.project, **prediction)
+            Prediction.objects.create(task=task_obj, **prediction)
 
     # run prediction
     with requests_mock.Mocker() as m:
         m.register_uri(
             'POST', 'http://localhost:8999/setup', text=json.dumps({'model_version': setup_returns_model_version})
-        )
+        )  # noqa
         m.register_uri(
             'POST',
             'http://localhost:8999/predict',
@@ -688,9 +687,9 @@ def test_predictions_with_partially_predicted_tasks(
         assert r.status_code == 200
         assert len(list(filter(lambda h: h.url.endswith('predict'), m.request_history))) == prediction_call_count
 
-        assert Prediction.objects.filter(project=project.id, model_version=setup_returns_model_version).count() == len(
-            tasks
-        )
+        assert Prediction.objects.filter(
+            task__project=project.id, model_version=setup_returns_model_version
+        ).count() == len(tasks)
         assert MLBackend.objects.get(url='http://localhost:8999').model_version == setup_returns_model_version
 
 
@@ -714,7 +713,7 @@ def test_interactive_annotating(business_client, configured_project):
                     'context': {'y': 'y'},
                 }
             ),
-            content_type='application/json',
+            content_type="application/json",
         )
         r.status_code = 200
 
@@ -743,7 +742,7 @@ def test_interactive_annotating_failing(business_client, configured_project):
                 'context': {'y': 'y'},
             }
         ),
-        content_type='application/json',
+        content_type="application/json",
     )
     r.status_code = 200
 
@@ -763,7 +762,7 @@ def test_interactive_annotating_failing(business_client, configured_project):
                     'context': {'y': 'y'},
                 }
             ),
-            content_type='application/json',
+            content_type="application/json",
         )
         r.status_code = 200
 
@@ -802,7 +801,7 @@ def test_interactive_annotating_with_drafts(business_client, configured_project)
                     'context': {'y': 'y'},
                 }
             ),
-            content_type='application/json',
+            content_type="application/json",
         )
         r.status_code = 200
 

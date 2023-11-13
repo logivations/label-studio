@@ -2,8 +2,7 @@
 title: Database setup 
 type: guide
 tier: opensource
-order: 80
-order_enterprise: 0
+order: 104
 meta_title: Database Storage Setup
 meta_description: Configure the database storage used by Label Studio to ensure performant and scalable data and configuration storage.
 section: "Install"

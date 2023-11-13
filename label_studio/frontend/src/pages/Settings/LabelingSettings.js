@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useHistory } from 'react-router';
+import { confirm } from '../../components/Modal/Modal';
 import { useAPI } from '../../providers/ApiProvider';
 import { useProject } from '../../providers/ProjectProvider';
 import { isEmptyString } from '../../utils/helpers';
 import { ConfigPage } from '../CreateProject/Config/Config';
 
 export const LabelingSettings = () => {
+  const history = useHistory();
   const { project, fetchProject } = useProject();
   const [config, setConfig] = useState("");
   const [essentialDataChanged, setEssentialDataChanged] = useState(false);
@@ -21,6 +24,7 @@ export const LabelingSettings = () => {
     });
 
     if (res.ok) {
+      history.push(`/projects/${project.id}/data`);
       return true;
     }
 
@@ -43,7 +47,7 @@ export const LabelingSettings = () => {
   }, [project]);
 
   const onSave = useCallback(async () => {
-    return saveConfig();
+    saveConfig();
   }, [essentialDataChanged, saveConfig]);
 
   const onUpdate = useCallback((config) => {

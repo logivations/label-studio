@@ -1,5 +1,6 @@
-from core.utils.exceptions import LabelStudioAPIException
 from rest_framework import status
+
+from core.utils.exceptions import LabelStudioAPIException
 
 
 class AnnotationDuplicateError(LabelStudioAPIException):

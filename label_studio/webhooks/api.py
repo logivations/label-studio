@@ -1,16 +1,19 @@
-import django_filters
+import logging
+
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg import openapi
+import django_filters
 from drf_yasg.utils import swagger_auto_schema
-from projects import models as project_models
+from drf_yasg import openapi
 from rest_framework import generics
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Webhook, WebhookAction
 from .serializers import WebhookSerializer, WebhookSerializerForUpdate
+from projects import models as project_models
 
 
 class WebhookFilterSet(django_filters.FilterSet):
@@ -24,7 +27,7 @@ class WebhookFilterSet(django_filters.FilterSet):
     decorator=swagger_auto_schema(
         tags=['Webhooks'],
         operation_summary='List all webhooks',
-        operation_description='List all webhooks set up for your organization.',
+        operation_description="List all webhooks set up for your organization.",
         manual_parameters=[
             openapi.Parameter(
                 name='project',
@@ -40,7 +43,7 @@ class WebhookFilterSet(django_filters.FilterSet):
     decorator=swagger_auto_schema(
         tags=['Webhooks'],
         operation_summary='Create a webhook',
-        operation_description='Create a webhook for your organization.',
+        operation_description="Create a webhook for your organization.",
     ),
 )
 class WebhookListAPI(generics.ListCreateAPIView):
@@ -93,12 +96,12 @@ class WebhookAPI(generics.RetrieveUpdateDestroyAPIView):
         tags=['Webhooks'],
         operation_summary='Get all webhook actions',
         operation_description='Get descriptions of all available webhook actions to set up webhooks.',
-        responses={'200': 'Object with description data.'},
+        responses={"200": "Object with description data."},
         manual_parameters=[
             openapi.Parameter(
                 'organization-only',
                 openapi.IN_QUERY,
-                description='organization-only or not',
+                description="organization-only or not",
                 type=openapi.TYPE_BOOLEAN,
             )
         ],

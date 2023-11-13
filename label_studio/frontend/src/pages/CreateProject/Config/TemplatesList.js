@@ -1,3 +1,5 @@
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/xml/xml';
 import React from 'react';
 import { Spinner } from '../../../components';
 import { useAPI } from '../../../providers/ApiProvider';

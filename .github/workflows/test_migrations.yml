@@ -33,14 +33,14 @@ jobs:
       - uses: hmarr/debug-action@v2.1.0
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.9'
 
       - name: Install OS dependencies
         run: |
@@ -67,8 +67,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r deploy/requirements-mw.txt
-          pip install -r deploy/requirements.txt
+          python -m pip install --upgrade pip setuptools
+          pip install --upgrade cython
+          pip install -U pip==20.2
+          pip install -r deploy/requirements.txt -r deploy/requirements-test.txt
           pip install -e .
 
       - name: Test migrations

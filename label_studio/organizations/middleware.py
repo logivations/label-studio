@@ -4,6 +4,7 @@ import logging
 
 from organizations.models import Organization
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,3 +22,4 @@ class DummyGetSessionMiddleware:
             request.session['organization_pk'] = org.id
         response = self.get_response(request)
         return response
+

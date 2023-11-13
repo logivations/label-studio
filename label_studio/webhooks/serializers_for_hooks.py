@@ -1,7 +1,8 @@
-from core.label_config import replace_task_data_undefined_with_config_field
-from projects.models import Project
 from rest_framework import serializers
-from tasks.models import Annotation, Task
+
+from projects.models import Project
+from tasks.models import Task, Annotation
+from core.label_config import replace_task_data_undefined_with_config_field
 
 
 class OnlyIDWebhookSerializer(serializers.Serializer):

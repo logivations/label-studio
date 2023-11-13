@@ -3,13 +3,11 @@ title: Frontend reference
 short: Frontend reference
 type: guide
 tier: all
-order: 435
-order_enterprise: 535
+order: 220
+order_enterprise: 127
 meta_title: Frontend Library Reference
 meta_description: Reference documentation for implementing the Label Studio Frontend into your own machine learning or data science application workflows.
 section: "Integration and Development"
-parent: "frontend"
-parent_enterprise: "frontend"
 ---
 
 Label Studio Frontend (LSF) includes several UI options and callbacks that you can use when implementing the frontend with a custom labeling backend, or when customizing the Label Studio interface.
@@ -198,8 +196,8 @@ const callback = () => {
 labelStudio.off("event", callback);
 ```
 
-!!! note
-    To be able to unsubscribe from an event, you must pass the same callback function reference to the `off` method.
+!!! info
+To be able to unsubscribe from an event, you must pass the same callback function reference to the `off` method.
 
 ## Available events
 
