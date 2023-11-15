@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import logging
+import datetime
 
 from django.db import transaction
 from django.db.models import Q
@@ -9,9 +10,10 @@ from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
 import drf_yasg.openapi as openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, viewsets, views
+from rest_framework import generics, viewsets, views, status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
+from django.db.models.signals import post_save
 
 from core.feature_flags import flag_set
 from core.permissions import ViewClassPermission, all_permissions
@@ -294,6 +296,24 @@ class AnnotationAPI(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, *args, **kwargs):
         return super(AnnotationAPI, self).get(request, *args, **kwargs)
 
+    def post(self, request, *args, **kargs):
+        """
+        A function that parses and stores annotations in the database using transaction.atomic
+        """
+        request_data = request.data
+        annotations_array = request_data.get("result", [])
+        tasks_array = request_data.get("task", [])
+        tasks = Task.objects.select_related('project').in_bulk(tasks_array)
+        with transaction.atomic():
+            for annotation, task_id in zip(annotations_array, tasks_array):
+                 Annotation.objects.create(
+                    result=annotation,
+                    task=tasks.get(task_id),
+                    project=tasks.get(task_id).project,
+                    completed_by=tasks.get(task_id).project.created_by,
+                 )
+        return Response(data={'success': 'Annotations created successfully.'}, status=status.HTTP_201_CREATED)
+
     @api_webhook(WebhookAction.ANNOTATION_UPDATED)
     @swagger_auto_schema(auto_schema=None)
     def put(self, request, *args, **kwargs):
@@ -545,6 +565,30 @@ class PredictionAPI(viewsets.ModelViewSet):
     def get_queryset(self):
         return Prediction.objects.filter(task__project__organization=self.request.user.active_organization)
 
+    def create(self, request, *args, **kwargs):
+        """
+        This method splits the request into individual Prediction objects and stores them in the database.
+        It also calls the post_save() signal to update the value in the Task model.
+        :param request:
+        :return:
+        """
+        request_data = request.data
+        if not request_data["model_version"]:
+            return Response({'error': 'Model name and date are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        predictions_array = request_data.get("result", [])
+        tasks_array = request_data.get("task", [])
+        predictions_to_create = []
+        tasks = Task.objects.select_related('project').in_bulk(tasks_array)
+        data = request_data.copy()
+        for prediction, task_id in zip(predictions_array, tasks_array):
+            data["result"] = prediction
+            data["task"] = tasks.get(task_id)
+            pred = Prediction(**data)
+            predictions_to_create.append(pred)
+            post_save.send(sender=Prediction, instance=pred, creared=True)
+
+        Prediction.objects.bulk_create(predictions_to_create)
+        return Response(data={'success': 'Predictions created successfully.'}, status=status.HTTP_201_CREATED)
 
 @method_decorator(name='get', decorator=swagger_auto_schema(auto_schema=None))
 @method_decorator(name='post', decorator=swagger_auto_schema(

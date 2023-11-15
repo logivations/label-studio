@@ -21,6 +21,7 @@ _api_urlpatterns = [
 ]
 
 _api_annotations_urlpatterns = [
+    path('', api.AnnotationAPI.as_view(), name='annotation-post'),
     path('<int:pk>/', api.AnnotationAPI.as_view(), name='annotation-detail'),
     path('<int:pk>/convert-to-draft', api.AnnotationConvertAPI.as_view(), name='annotation-convert-to-draft'),
 ]
