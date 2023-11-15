@@ -57,7 +57,7 @@ jobs:
       - uses: hmarr/debug-action@v2.1.0
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
 
@@ -79,8 +79,6 @@ jobs:
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pypi-${{ hashFiles('deploy/requirements-mw.txt') }}-${{ hashFiles('deploy/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pypi-
 
       - name: Install dependencies
         run: |
