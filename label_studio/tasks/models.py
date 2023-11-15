@@ -476,7 +476,6 @@ def get_storages_for_delete(queryset):
     storages = []
     data = []
     for task in queryset:
-        print(f"task: {task}")
         for link_name in settings.IO_STORAGES_IMPORT_LINK_NAMES:
             if hasattr(task, link_name):
                 attr = getattr(task, link_name)
@@ -495,10 +494,9 @@ def delete_local_storage(data, storages):
     """
     for path in data:
         if os.path.exists(path):
-            print(f"Removed image from: {path}")
             os.remove(path)
         else:
-            print("The file does not exist")
+            logger.info("The file does not exist")
     for storage in storages:
         if not storage.links.all():
             if storage.title in storage.path:
@@ -506,7 +504,7 @@ def delete_local_storage(data, storages):
                     for name in dirs:
                         os.rmdir(os.path.join(root, name))
                 os.rmdir(storage.path)
-                print("dir removed")
+                logger.info(f"Removed: {storage.path}")
             storage.delete()
 
 
@@ -1054,10 +1052,10 @@ def remove_predictions_from_project(sender, instance, **kwargs):
 @receiver(post_save, sender=Prediction)
 def save_predictions_to_project(sender, instance, **kwargs):
     """Add predictions counters"""
-    instance.task.total_predictions = instance.task.predictions.all().count()
-    instance.task.save(update_fields=['total_predictions'])
-    logger.debug(f'Updated total_predictions for {instance.task.id}.')
-
+    task_id = instance.task_id
+    predictions_count = Prediction.objects.filter(task_id=task_id).count()
+    Task.objects.filter(id=task_id).update(total_predictions=predictions_count + 1)
+    logger.debug(f"Updated total_predictions for {instance.task.id}.")
 
 # =========== END OF PROJECT SUMMARY UPDATES ===========
 
